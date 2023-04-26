@@ -10,7 +10,7 @@ Or add: "proc_mem = VERSION" into your Cargo.toml file.
 
 ## Usage
 
-# Example: get a running process
+### Example: get a running process
 
 In order to get a running process you will have to
 call [`Process::with_name()`] or [`Process::with_pid()`].
@@ -22,7 +22,7 @@ let chrome:  Result<Process, ProcMemError> = Process::with_name("chrome.exe");
 let firefox: Result<Process, ProcMemError> = Process::with_pid(12345);
 ```
 
-# Example: terminate a process
+### Example: terminate a process
 
 ```rust
 use proc_mem::Process;
@@ -30,7 +30,7 @@ let chrome:  Result<Process, ProcMemError> = Process::with_name("chrome.exe");
 let did_terminate: bool = chrome.kill();
 ```
 
-# Example: get a module from a process
+### Example: get a module from a process
 
 To get a module which was loaded by a process
 you just have to call [`Process::module()`].
@@ -42,7 +42,7 @@ let chrome = Process::with_name("chrome.exe")?;
 let desired_module: Result<Module,ProcMemError> = chrome.module("kernel32.dll");
 ```
 
-# Example: read/write memory
+### Example: read/write memory
 
 To read memory you have to call [`Process::read_mem()`].
 This function takes a type and the address to read.
@@ -79,7 +79,7 @@ let chain: Vec<usize> = vec![module.base_address(), 0xDEA964, 0x100]
 let read_value: Result<T, ProcMemError> = chrome.read_mem_chain::<T>(chain);
 ```
 
-# Example: pattern scanning
+### Example: pattern scanning
 
 It´s a pain to maintain offsets manually, but luckily proc_mem
 provides a way around that issue.
