@@ -6,6 +6,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ZesaHG/ProcMem.git/"
 description = "manage processes, modules and read/write their memory on windows"
+documentation = "https://docs.rs/proc_mem"
 readme = "README.md"
 publish = true
 keywords = ["process", "module", "read-write", "memory", "patternscan"]
