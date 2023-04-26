@@ -1,8 +1,18 @@
 [package]
 name = "proc_mem"
 version = "0.1.0"
+authors = ["ZesaHG <info@highlight-germany.com>"]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ZesaHG/ProcMem.git/"
+description = "manage processes, modules and read/write their memory on windows"
+readme = "README.md"
+publish = false
 
 [dependencies]
+regex = "1.8.1"
+winapi = {version = "^0.3.9", features = ["handleapi","tlhelp32", "memoryapi", "processthreadsapi", "psapi", "winbase"]}
+
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
+targets = ["x86_64-pc-windows-msvc", "i686-pc-windows-msvc"]
