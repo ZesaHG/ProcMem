@@ -68,13 +68,11 @@ impl Module {
             let data = self.module_data.get(pos).ok_or_else(|| {
                 ProcMemError::AddressOutOfBounds
             })?;
-            println!("data: {:02X}", data);
             let tmp = {
                 let raw: u64 = unsafe {(data as *const u8).cast::<u64>().read_unaligned()};
                 raw as usize
             };
 
-            println!("tmp: {:02X?}", tmp);
             addr = tmp.wrapping_sub(self.module_baseaddr);
         }
 
