@@ -7,7 +7,9 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/ZesaHG/ProcMem.git/"
 description = "manage processes, modules and read/write their memory on windows"
 readme = "README.md"
-publish = false
+publish = true
+keywords = ["process", "module", "read-write", "memory", "patternscan"]
+categories = ["accessibility", "memory-management", "os::windows-apis", "games"]
 
 [dependencies]
 regex = "1.8.1"
