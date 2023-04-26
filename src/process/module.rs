@@ -2,6 +2,7 @@ use regex::bytes::Regex;
 
 use crate::ProcMemError;
 
+/// contains info needed to find the byte pattern in memory
 pub struct Signature {
     pub name: String,
     pub pattern: String,
@@ -17,6 +18,7 @@ pub struct Signature {
     pub rip_offset: isize,
 }
 
+/// contains info about the module and its content in bytes
 #[derive(Debug)]
 pub struct Module {
     module_name: String,

@@ -18,12 +18,12 @@ use winapi::{um::{tlhelp32::{TH32CS_SNAPPROCESS, TH32CS_SNAPMODULE},
 
 #[derive(Debug)]
 
-/// contains name, pid of a process and a handle with
-/// either PROCESS_ALL_ACCESS or PROCESS_VM_READ | PROCESS_VM_WRITE
+/// contains name, pid and handle of a process 
 pub struct Process {
-    process_name: String,
-    process_id: u32,
-    process_handle: Handle,
+    pub process_name: String,
+    pub process_id: u32,
+    /// either PROCESS_ALL_ACCESS or PROCESS_VM_READ | PROCESS_VM_WRITE
+    pub process_handle: Handle,
 }
 
 impl Process {
