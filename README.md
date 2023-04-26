@@ -6,7 +6,8 @@ Furthermore ProcMem provides some functions to read/write to/from memory address
 ## Installation
 
 Use the package manager [cargo](https://doc.rust-lang.org/cargo/) to install ProcMem (cargo add proc_mem).
-Or add: "proc_mem = VERSION" into your Cargo.toml file.
+Or copy the newest version number from [crates.io](https://crates.io/crates/proc_mem)
+and paste into your Cargo.toml file.
 
 ## Usage
 
