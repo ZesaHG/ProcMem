@@ -90,7 +90,7 @@ this way.
 ```rust
 use proc_mem::{Process, Module, Signature};
 let some_game = Process::with_name("some_game.exe")?;
-let module = chrome.module("module.dll")?;
+let module = some_game.module("module.dll")?;
 let lp_signature = Signature {
     name: "LocalPlayer",
     pattern: "8D 34 85 ? ? ? ? 89 15 ? ? ? ? 8B 41 08 8B 48 04 83 F9 FF",
