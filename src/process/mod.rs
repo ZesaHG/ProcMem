@@ -250,7 +250,11 @@ impl Process {
 
         while chain.len() != 1 {
             address += chain.remove(0);
-            address = self.read_mem::<usize>(address)?;
+            address = if self.iswow64() {
+                self.read_mem::<u32>(address)? as usize
+            } else {
+                self.read_mem::<u64>(address)? as usize
+            }
         }
 
         let ret = self.read_mem::<T>(address + chain.remove(0))?;
