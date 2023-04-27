@@ -1,6 +1,6 @@
 [package]
 name = "proc_mem"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["ZesaHG <info@highlight-germany.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -14,7 +14,7 @@ categories = ["accessibility", "memory-management", "os::windows-apis", "games"]
 
 [dependencies]
 regex = "1.8.1"
-winapi = {version = "^0.3.9", features = ["handleapi","tlhelp32", "memoryapi", "processthreadsapi", "psapi", "winbase"]}
+winapi = {version = "^0.3.9", features = ["handleapi","tlhelp32", "memoryapi", "processthreadsapi", "psapi", "winbase", "wow64apiset"]}
 
 [package.metadata.docs.rs]
 default-target = "x86_64-pc-windows-msvc"
