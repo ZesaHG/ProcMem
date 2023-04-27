@@ -1,6 +1,6 @@
 [package]
 name = "proc_mem"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["ZesaHG <info@highlight-germany.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
