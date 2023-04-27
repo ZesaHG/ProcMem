@@ -263,6 +263,32 @@ impl Process {
     }
 
 
+    /// This function takes a type and a Vec of addresses/offsets,
+    /// the first entry being the base address to start from.
+    /// On success the address at the end of the chain will be returned.
+    /// ```rust
+    /// use proc_mem::{Process, Module, ProcMemError};
+    /// let some_game = Process::with_name("some_game.exe")?;
+    /// let module = some_game.module("client.dll")?;
+    /// let chain: Vec<usize> = vec![module.base_address(), 0xDEA964, 0x100]
+    /// let desired_address: Result<usize, ProcMemError> = chrome.read_ptr_chain(chain);
+    /// ```
+    pub fn read_ptr_chain(&self, mut chain: Vec<usize>) -> Result<usize,ProcMemError> {
+        let mut address = chain.remove(0);
+
+        while chain.len() != 1 {
+            address += chain.remove(0);
+            address = if self.iswow64() {
+                self.read_mem::<u32>(address)? as usize
+            } else {
+                self.read_mem::<u64>(address)? as usize
+            }
+        }
+
+        return Ok(address + chain.remove(0));
+    }
+
+
     /// This function takes a type and the address to write to.
     /// the returned boolean will be true on success and false on failure
     /// ```rust
