@@ -24,6 +24,7 @@ pub struct Module {
     module_name: String,
     module_path: String,
     process_id: u32,
+    process_iswow64: bool,
     module_baseaddr: usize,
     module_basesize: usize,
     module_data: Vec<u8>
@@ -34,7 +35,8 @@ impl Module {
         Module { 
             module_name: mname,
             module_path: mpath, 
-            process_id: pid, 
+            process_id: pid,
+            process_iswow64: proc.iswow64(), 
             module_baseaddr: mbaseaddr, 
             module_basesize: mbasesize,
             module_data: proc.read_module(mbaseaddr, mbasesize).unwrap_or_default(),
@@ -60,6 +62,23 @@ impl Module {
         Some(raw)
     }
 
+
+    /// This functions finds an address in memory based on the provided [`Signature`]
+    /// ```rust
+    /// use proc_mem::{Process, Module, Signature, ProcMemError};
+    /// let some_game: Result<Process,ProcMemError> = Process::with_name("some_game.exe");
+    /// let module: Result<Module,ProcMemError> = some_game.module("module.dll");
+    /// let lp_signature = Signature {
+    ///     name: "LocalPlayer",
+    ///     pattern: "8D 34 85 ? ? ? ? 89 15 ? ? ? ? 8B 41 08 8B 48 04 83 F9 FF",
+    ///     offsets: vec![3],
+    ///     extra: 4,
+    ///     relative: true,
+    ///     rip_relative: false,
+    ///     rip_offset: 0,
+    /// };
+    /// let lp_address: Result<usize,ProcMemError> = module.find_signature(&lp_signature);
+    /// ``` 
     pub fn find_signature(&self, sig: &Signature) -> Result<usize, ProcMemError> {
         let mut addr = Self::find_pattern(&self.module_data,&sig.pattern).ok_or(ProcMemError::SignatureNotFound)?;
         
@@ -68,8 +87,11 @@ impl Module {
             let data = self.module_data.get(pos).ok_or_else(|| {
                 ProcMemError::AddressOutOfBounds
             })?;
-            let tmp = {
+            let tmp = if self.process_iswow64 {
                 let raw: u64 = unsafe {(data as *const u8).cast::<u64>().read_unaligned()};
+                raw as usize
+            } else {
+                let raw: u32 = unsafe {(data as *const u8).cast::<u32>().read_unaligned()};
                 raw as usize
             };
 
