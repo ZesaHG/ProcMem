@@ -28,6 +28,8 @@ pub struct Process {
     pub process_base_address: usize,
     /// either PROCESS_ALL_ACCESS or PROCESS_VM_READ | PROCESS_VM_WRITE
     pub process_handle: Handle,
+    /// is x32 or x64
+    pub iswow64: bool
 }
 
 impl Process {
@@ -54,10 +56,12 @@ impl Process {
                     process_name: String::from(&process_name), 
                     process_id: pid,
                     process_base_address: 0,
-                    process_handle: Handle::read_write(pid)? 
+                    process_handle: Handle::read_write(pid)?,
+                    iswow64: false,
                 };
                 
                 proc.process_base_address = proc.module(&process_name)?.base_address();
+                proc.iswow64 = proc.iswow64();
 
                 return Ok(proc)
             }
@@ -89,10 +93,12 @@ impl Process {
                     process_name: String::from(&process_name), 
                     process_id: pe32.th32ProcessID,
                     process_base_address: 0,
-                    process_handle: Handle::read_write(pe32.th32ProcessID)? 
+                    process_handle: Handle::read_write(pe32.th32ProcessID)?,
+                    iswow64: false, 
                 };
                 
                 proc.process_base_address = proc.module(&process_name)?.base_address();
+                proc.iswow64 = proc.iswow64();
 
                 return Ok(proc)
             }
@@ -126,10 +132,12 @@ impl Process {
                     process_name: String::from(&process_name), 
                     process_id: pe32.th32ProcessID,
                     process_base_address: 0,
-                    process_handle: Handle::read_write(pe32.th32ProcessID)? 
+                    process_handle: Handle::read_write(pe32.th32ProcessID)?,
+                    iswow64: false 
                 };
 
                 proc.process_base_address = proc.module(&process_name)?.base_address();
+                proc.iswow64 = proc.iswow64();
 
                 results.push(proc);
             }
@@ -250,7 +258,7 @@ impl Process {
 
         while chain.len() != 1 {
             address += chain.remove(0);
-            address = if self.iswow64() {
+            address = if self.iswow64 {
                 self.read_mem::<u32>(address)? as usize
             } else {
                 self.read_mem::<u64>(address)? as usize
@@ -275,10 +283,11 @@ impl Process {
     /// ```
     pub fn read_ptr_chain(&self, mut chain: Vec<usize>) -> Result<usize,ProcMemError> {
         let mut address = chain.remove(0);
+        
 
         while chain.len() != 1 {
             address += chain.remove(0);
-            address = if self.iswow64() {
+            address = if self.iswow64 {
                 self.read_mem::<u32>(address)? as usize
             } else {
                 self.read_mem::<u64>(address)? as usize
