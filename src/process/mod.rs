@@ -146,7 +146,7 @@ impl Process {
 
     /// returns an instance of module including its base address in memory
     /// 
-    /// /// ```rust
+    /// ```rust
     /// use proc_mem::{Process, Module, ProcMemError};
     /// let process = Process::with_name("process.exe")?;
     /// let module: Result<Module,ProcMemError> = process.module("module.dll");
@@ -181,7 +181,7 @@ impl Process {
 
     /// returns true if the process was terminated, otherwise will return false
     /// 
-    /// /// ```rust
+    /// ```rust
     /// use proc_mem::{Process};
     /// let process = Process::with_name("process.exe")?;
     /// let did_terminate: bool = process.kill();
