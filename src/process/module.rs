@@ -88,10 +88,10 @@ impl Module {
                 ProcMemError::AddressOutOfBounds
             })?;
             let tmp = if self.process_iswow64 {
-                let raw: u64 = unsafe {(data as *const u8).cast::<u64>().read_unaligned()};
+                let raw: u32 = unsafe {(data as *const u8).cast::<u32>().read_unaligned()};
                 raw as usize
             } else {
-                let raw: u32 = unsafe {(data as *const u8).cast::<u32>().read_unaligned()};
+                let raw: u64 = unsafe {(data as *const u8).cast::<u64>().read_unaligned()};
                 raw as usize
             };
 
