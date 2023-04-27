@@ -14,13 +14,14 @@ and paste into your Cargo.toml file.
 ### Example: get a running process
 
 In order to get a running process you will have to
-call [`Process::with_name()`] or [`Process::with_pid()`].
+call [`Process::with_name()`], [`Process::with_pid()`] or [`Process::all_with_name()`].
 On success the returned value will be of type: [`Process`].
 
 ```rust
 use proc_mem::Process;
 let chrome:  Result<Process, ProcMemError> = Process::with_name("chrome.exe");
 let firefox: Result<Process, ProcMemError> = Process::with_pid(12345);
+let vscode: Result<Vec<Process>, ProcMemError>  = Process::all_with_name("Code.exe");
 ```
 
 ### Example: terminate a process
@@ -78,6 +79,20 @@ let chrome = Process::with_name("chrome.exe")?;
 let module = chrome.module("kernel32.dll")?;
 let chain: Vec<usize> = vec![module.base_address(), 0xDEA964, 0x100]
 let read_value: Result<T, ProcMemError> = chrome.read_mem_chain::<T>(chain);
+```
+
+If you dont want to read the value from the end of the chain
+you can use the function: [`Process::read_ptr_chain()`].
+This function takes a Vec of addresses/offsets,
+the first entry being the base address to start from.
+On success the address at the end of the chain will be returned.
+
+```rust
+use proc_mem::{Process, Module};
+let chrome = Process::with_name("chrome.exe")?;
+let module = chrome.module("kernel32.dll")?;
+let chain: Vec<usize> = vec![module.base_address(), 0xDEA964, 0x100]
+let desired_address: Result<usize, ProcMemError> = chrome.read_ptr_chain(chain);
 ```
 
 ### Example: pattern scanning
