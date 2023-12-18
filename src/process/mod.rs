@@ -11,13 +11,13 @@ pub use module::{Module, Signature};
 
 use winapi::{um::{tlhelp32::{TH32CS_SNAPPROCESS, TH32CS_SNAPMODULE, TH32CS_SNAPMODULE32}, 
                   winbase::CREATE_NO_WINDOW, 
-                  memoryapi::{ReadProcessMemory, WriteProcessMemory},
+                  memoryapi::{ReadProcessMemory, WriteProcessMemory, VirtualProtect},
                   wow64apiset::IsWow64Process,
                  }, 
              shared::{minwindef::{FALSE, LPCVOID, LPVOID, BOOL, PBOOL}, basetsd::SIZE_T}
             };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 
 /// contains name, pid and handle of a process 
 pub struct Process {
@@ -360,6 +360,16 @@ impl Process {
         }
     }
 
+    /// Returns "TRUE" specified Memory Protection was changed successfully
+    pub fn protect_mem(&self, address: usize, size: usize, new_protect: u32, old_protect: *mut u32) -> BOOL
+    {
+       let mut _result: BOOL = FALSE;
+        unsafe {
+            _result = VirtualProtect(address as LPVOID, size, new_protect, old_protect);
+        }
+        return _result;
+    }
+
     fn read_module(&self, address: usize, msize: usize) -> Result<Vec<u8>, ProcMemError> {
         let mut out = vec![0u8;msize];
         let out_ptr = out.as_mut_ptr();
@@ -378,3 +388,6 @@ impl Process {
         }    
     }
 }
+
+unsafe impl Send for Process {}
+unsafe impl Sync for Process {}

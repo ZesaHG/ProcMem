@@ -1,10 +1,9 @@
 use std::ops::Deref;
 
-use winapi::{um::{handleapi::{CloseHandle, INVALID_HANDLE_VALUE},
+use winapi::um::{handleapi::{CloseHandle, INVALID_HANDLE_VALUE},
                   winnt::{HANDLE, PROCESS_ALL_ACCESS, PROCESS_VM_READ, PROCESS_VM_WRITE}, 
                   processthreadsapi::OpenProcess
-                 },
-            };
+                 };
 
 use crate::ProcMemError;
 
@@ -12,7 +11,7 @@ use crate::ProcMemError;
 /// Wrapper around winapi HANDLE for automatic closing of the handle upon destruction
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Handle(pub HANDLE);
 
 impl Deref for Handle {
