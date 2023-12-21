@@ -234,7 +234,7 @@ impl Process {
                 address as *const _, 
                 &mut out as *mut T as *mut _, 
                 std::mem::size_of::<T>(), 
-                0 as *mut _
+                std::ptr::null_mut::<SIZE_T>()
             ) == FALSE {
                 println!("ReadProcessMemory failed. Error: {:?}", std::io::Error::last_os_error());
                 return Err(ProcMemError::ReadMemoryError);
@@ -299,12 +299,13 @@ impl Process {
 
 
     /// This function takes a type and the address to write to.
-    /// the returned boolean will be true on success and false on failure
+    /// The returned boolean will be true on success and false on failure
     /// ```rust
     /// use proc_mem::{Process, Module};
     /// let chrome = Process::with_name("chrome.exe")?;
     /// let module = chrome.module("kernel32.dll")?;
-    /// let write_result: bool = chrome.read_mem::<T>(module.base_address() + 0x1337);
+    /// let mut value_to_write: i32 = 1337;
+    /// let write_result: bool = chrome.write_mem(module.base_address() + 0x1337, value_to_write);
     /// ```
     pub fn write_mem<T: Default>(&self, address: usize, mut value: T) -> bool {
         unsafe {
@@ -313,30 +314,79 @@ impl Process {
                 address as *mut  _, 
                 &mut value as *mut T as *mut _, 
                 std::mem::size_of::<T>(), 
-                0 as *mut usize
+                std::ptr::null_mut::<SIZE_T>()
+            ) != FALSE
+        }
+    }
+
+    /// With this function someone can write multiple bytes to a specified address.
+    /// The returned boolean will be true on success and false on failure
+    /// ```rust
+    /// use proc_mem::{Process, Module};
+    /// let chrome = Process::with_name("chrome.exe")?;
+    /// let module = chrome.module("kernel32.dll")?;
+    /// let mut bytes_to_write: Vec<u8> = [ 0x48, 0xC7, 0xC0, 0x0A, 0x00, 0x00, 0x00 ].to_vec();
+    /// let write_result: bool = chrome.write_bytes(module.base_address() + 0x1337, bytes_to_write.as_mut_ptr(), bytes_to_write.len());
+    /// ```
+    pub fn write_bytes(&self, address: usize, buf: *mut u8, size: usize) -> bool {
+        unsafe {
+            WriteProcessMemory(
+                *self.process_handle,
+                address as *mut _,
+                buf as *mut _,
+                size as SIZE_T,
+                std::ptr::null_mut::<SIZE_T>()
             ) != FALSE
         }
     }
 
     /// C style method to read memory
+    /// Third argument is the multiplicator of the Size of "T"
+    /// for example if someone would want to read multiple bytes
     /// ```rust
     /// use proc_mem::{Process, Module}
     /// let chrome = Process::with_name("chrome.exe")?;
     /// let module = chrome.module("kernel32.dll")?;
     /// let mut value_buffer: i32 = 0;
-    /// if !chrome.read_ptr(value.buffer.as_mut_ptr(), module.base_address() + 0x1337) {
+    /// if !chrome.read_ptr(&mut value_buffer, module.base_address() + 0x1337, None) {
     ///     println!("ReadMemory Failure");
     /// } else {
     ///     println!("ReadMemory Success");
     /// }
     /// ```
-    pub fn read_ptr<T: Copy>(&self, buf: *mut T, address: usize, count: usize) -> bool {
+    pub fn read_ptr<T: Copy>(&self, buf: *mut T, address: usize) -> bool {
         unsafe {
             ReadProcessMemory(
                 *self.process_handle,
                 address as LPCVOID,
                 buf as *mut T as LPVOID,
-                std::mem::size_of::<T>() as SIZE_T * count,
+                std::mem::size_of::<T>() as SIZE_T,
+                std::ptr::null_mut::<SIZE_T>(),
+            ) != FALSE
+        }
+    }
+
+    /// C style method to read multiple bytes from memory
+    /// ```rust
+    /// use proc_mem::{Process, Module}
+    /// let chrome = Process::with_name("chrome.exe")?;
+    /// let module = chrome.module("kernel32.dll")?;
+    /// 
+    /// let rsize = 10;
+    /// let mut bytes_buffer: Vec<u8> = vec![0u8;rsize];
+    /// if !chrome.read_bytes(module.base_address() + 0x1337, bytes_buffer.as_mut_ptr(), rsize) {
+    ///     println!("ReadMemory Failure");
+    /// } else {
+    ///     println!("ReadMemory Success");
+    /// }
+    /// ```
+    pub fn read_bytes(&self, address: usize, buf: *mut u8, size: usize) -> bool {
+        unsafe {
+            ReadProcessMemory(
+                *self.process_handle,
+                address as LPCVOID,
+                buf as LPVOID,
+                size as SIZE_T,
                 std::ptr::null_mut::<SIZE_T>(),
             ) != FALSE
         }
@@ -361,13 +411,16 @@ impl Process {
     }
 
     /// Returns "TRUE" specified Memory Protection was changed successfully
-    pub fn protect_mem(&self, address: usize, size: usize, new_protect: u32, old_protect: *mut u32) -> BOOL
+    pub fn protect_mem(&self, address: usize, size: usize, new_protect: u32, old_protect: *mut u32) -> bool
     {
        let mut _result: BOOL = FALSE;
         unsafe {
             _result = VirtualProtect(address as LPVOID, size, new_protect, old_protect);
         }
-        return _result;
+        match _result {
+            FALSE => false,
+            _ => true
+        }
     }
 
     fn read_module(&self, address: usize, msize: usize) -> Result<Vec<u8>, ProcMemError> {

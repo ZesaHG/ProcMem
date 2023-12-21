@@ -65,7 +65,20 @@ the returned boolean will be true on success and false on failure
 use proc_mem::{Process, Module};
 let chrome = Process::with_name("chrome.exe")?;
 let module = chrome.module("kernel32.dll")?;
-let write_result: bool = chrome.read_mem::<T>(module.base_address() + 0x1337);
+let mut val_to_write: i32 = 1337;
+let write_result: bool = chrome.write_mem::<T>(module.base_address() + 0x1337, val_to_write);
+```
+
+For the case that the region of memory you are trying to read/write
+is protected e.g.: PAGE_READ and you need to change it,
+you can use the function [`Process::protect_mem()`].
+
+```rust
+use proc_mem::{Process, Module};
+let chrome = Process::with_name("chrome.exe")?;
+let module = chrome.module("kernel32.dll")?;
+let mut old_protect: u32 = 0;
+let protect_result: bool = chrome.protect_mem(module.base_address() + 0x1337, size_of::<i32>(), 0x4, &mut old_protect);
 ```
 
 There is also a function to read pointer chains [`Process::read_mem_chain()`].
